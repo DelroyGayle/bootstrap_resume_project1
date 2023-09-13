@@ -1,6 +1,11 @@
 function userInformationHTML(user) {
+    /* Modified so that 'null' is NOT shown for a null user.name' */
+    let the_username = user.name;
+    if (!the_username) {
+        the_username = "";
+    }
     return `
-        <h2>${user.name}
+        <h2>${the_username}
             <span class="small-name">
                 (@<a href="${user.html_url}" target="_blank">${user.login}</a>)
             </span>
@@ -65,6 +70,9 @@ function fetchGitHubInformation(event) {
             if (errorResponse.status === 404) {
                 $("#gh-user-data").html(
                     `<h2>No info found for user ${username}</h2>`);
+            } else if (errorResponse.status === 403) {
+                const resetTime = new Date(errorResponse.getResponseHeader('X-RateLimit-Reset') * 1000);
+                $("#gh-user-data").html(`<h4>Too many requests, please wait until ${resetTime.toLocaleTimeString()}</h4>`);
             } else {
                 console.log(errorResponse);
                 $("#gh-user-data").html(
